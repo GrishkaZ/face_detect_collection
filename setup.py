@@ -14,5 +14,8 @@ setup(
     author_email='grigoriozaly@yandex.ru',
     packages=find_packages(),
     install_requires=requirements,
-    include_package_data=True,
+    package_data={
+        "face_detect_collection": ['models/face_detection_models/haarcascade_frontalface_default.xml'],
+    },
+    # include_package_data=True,
 )
