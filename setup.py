@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 from face_detect_collection import __version__
 
@@ -12,6 +12,7 @@ setup(
     url='https://github.com/GrishkaZ/face_detect_collection',
     author='GZ',
     author_email='grigoriozaly@yandex.ru',
-    packages=['face_detect_collection'],
+    packages=find_packages(),
     install_requires=requirements,
+    include_package_data=True,
 )
