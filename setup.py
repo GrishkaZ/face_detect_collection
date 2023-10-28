@@ -9,6 +9,5 @@ setup(
     url='https://github.com/GrishkaZ/face_detect_collection',
     author='GZ',
     author_email='grigoriozaly@yandex.ru',
-
-    py_modules=['face_detect_collection'],
+    packages=['face_detect_collection'],
 )
