@@ -1,4 +1,6 @@
 opencv-contrib-python>=4.6
 numpy
+onnx
+onnxruntime
 # dlib
 # mediapipe
