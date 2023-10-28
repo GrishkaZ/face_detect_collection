@@ -6,7 +6,7 @@ setup(
     name='face_detect_collection',
     version=__version__,
 
-    url='https://github.com/MichaelKim0407/tutorial-pip-package',
+    url='https://github.com/GrishkaZ/face_detect_collection',
     author='GZ',
     author_email='grigoriozaly@yandex.ru',
 
