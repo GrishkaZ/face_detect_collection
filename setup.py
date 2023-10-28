@@ -15,7 +15,10 @@ setup(
     packages=find_packages(),
     install_requires=requirements,
     package_data={
-        "face_detect_collection": ['models/face_detection_models/*'],
+        "face_detect_collection": [
+            'models/face_detection_models/*',
+            'models/face_detection_models/face_detector_caffe/*',
+            ],
     },
     # include_package_data=True,
 )
