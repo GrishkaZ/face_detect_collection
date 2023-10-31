@@ -60,3 +60,4 @@ class IResnet(_BasicFaceEmbeddingsModel):
             res.extend(res_batch.tolist())
 
         return res
+
