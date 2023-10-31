@@ -4,6 +4,10 @@ import numpy as np
 import os
 import cv2
 
+#to add ?:
+#https://www.robots.ox.ac.uk/~vgg/software/vgg_face/
+
+
 root_dir = os.path.join(os.path.dirname(__file__), 'models/face_embeddings_models/')
 
 def normalize(arr):

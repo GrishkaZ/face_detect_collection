@@ -1,4 +1,4 @@
-from .face_detection import CaffeFaceDetector, HaarCascadeFaceDetector
+from .face_detection import CaffeFaceDetector, HaarCascadeFaceDetector, MediapipeSolutionFaceDetector, MediapipeTaskFaceDetector
 from  .face_embeddings import IResnet
 from  .face_lanmarks import MediapipeFaceMeshDetector
 

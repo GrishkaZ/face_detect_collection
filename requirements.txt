@@ -3,4 +3,8 @@ numpy
 onnx
 onnxruntime
 # dlib
-mediapipe
+# face_recognition https://github.com/ageitgey/face_recognition
+# https://pyimagesearch.com/2018/06/18/face-recognition-with-opencv-python-and-deep-learning/
+mediapipe #https://developers.google.com/mediapipe
+#kornia
+# https://kornia.readthedocs.io/en/latest/contrib.html
