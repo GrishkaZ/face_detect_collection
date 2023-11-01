@@ -33,9 +33,6 @@ class MediapipeFaceAligner():
     def __del__(self):
         self.face_aligner_model.close()
 
-
-
-
 class MediapipeLandmarksDrawer:
 
     #todo set drawing params
@@ -106,7 +103,8 @@ class MediapipeFaceMeshDetector:
       For static images.
       params: see mediapipe FaceMesh docks
     '''
-    def detect_on_images(self, images, return_landmarks = False,  max_num_faces = 1, refine_landmarks = False, min_detection_confidence=0.5):
+    def detect_on_images(self, images, return_landmarks = True,
+                         max_num_faces = 1, refine_landmarks = False, min_detection_confidence=0.5):
 
         if not self.drawer and not return_landmarks:
             raise ValueError('if return_landmarks == False, the drawer must be')
@@ -307,3 +305,41 @@ class MediapipeFaceMeshDetector:
         # def _trans_f(landmarks):
 #     landmarks = np.array(detector.findFaceMesh(img, False)[1][0])
 #     return torch.Tensor((landmarks - [133.00270142, 201.18676369]) / [46.83234683, 49.95552163]).transpose(1,0).unsqueeze(0)
+
+
+class FaceMeshTriangulator:
+
+    def __init__(self, face_mesh_coordinates, img_w, img_h):
+        r = (0, 0, img_w, img_h)
+        self.subdiv = cv2.Subdiv2D(r)
+
+        for p in face_mesh_coordinates:
+            self.subdiv.insert(p)
+
+    def draw_delaunay(self, img, color, inplace=False):
+        if not inplace:
+            img = img.copy()
+        trangleList = self.subdiv.getTriangleList()
+        for t in trangleList:
+            pt1 = (int(t[0]), int(t[1]))
+            pt2 = (int(t[2]), int(t[3]))
+            pt3 = (int(t[4]), int(t[5]))
+            cv2.line(img, pt1, pt2, color, 1)
+            cv2.line(img, pt2, pt3, color, 1)
+            cv2.line(img, pt3, pt1, color, 1)
+
+        if not inplace:
+            return img
+
+    def draw_voronoi(self,img, color, inplace = False):
+        if not inplace:
+            img = img.copy()
+        (facets, centers) = self.subdiv.getVoronoiFacetList([])
+        facets = [np.array(facet, dtype = int) for facet in facets]
+        cv2.polylines(img, facets, True, color, 1)
+        if not inplace:
+            return img
+
+
+
+

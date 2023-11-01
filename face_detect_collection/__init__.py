@@ -1,8 +1,8 @@
 from .face_detection import CaffeFaceDetector, HaarCascadeFaceDetector,\
     MediapipeSolutionFaceDetector, MediapipeTaskFaceDetector, KorniaFaceDetector
 from  .face_embeddings import IResnet
-from  .face_lanmarks import MediapipeFaceMeshDetector, MediapipeFaceAligner
+from  .face_lanmarks import MediapipeFaceMeshDetector, MediapipeFaceAligner, FaceMeshTriangulator
 
 __all__ = ['face_lanmarks', 'face_detection', 'face_embeddings']
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
