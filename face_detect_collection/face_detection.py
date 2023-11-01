@@ -1,10 +1,16 @@
 from abc import abstractmethod
+from collections import defaultdict
+from typing import List
 
 import cv2
 import os
+import itertools
 import numpy as np
 import mediapipe as mp
 import time
+
+import torch
+from kornia import contrib as kc
 
 root_dir = os.path.join(os.path.dirname(__file__), 'models/face_detection_models/')
 
@@ -13,7 +19,11 @@ def draw_bboxes(image, bboxes, inplace=False):
     if not inplace:
         image = image.copy()
     for (x, y, w, h) in bboxes:
-        cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0), 2)
+        try:
+            cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0), 2)
+        except:
+            print('DRAW RECTANGLE ERROR')
+            print((x, y), (x + w, y + h))
     if not inplace:
         return image
 
@@ -183,41 +193,70 @@ class MediapipeTaskFaceDetector(_BaseFaceDetector):
                 bboxes.append((bbox.origin_x, bbox.origin_y, bbox.width, bbox.height))
             return bboxes
 
-    # @staticmethod
-    # def visualize(image,detection_result) -> np.ndarray:
-    #
-    #     annotated_image = image.copy()
-    #     height, width, _ = image.shape
-    #
-    #     for detection in detection_result.detections:
-    #         # Draw bounding_box
-    #         bbox = detection.bounding_box
-    #         start_point = bbox.origin_x, bbox.origin_y
-    #         end_point = bbox.origin_x + bbox.width, bbox.origin_y + bbox.height
-    #         cv2.rectangle(annotated_image, start_point, end_point, TEXT_COLOR, 3)
-    #
-    #         # Draw keypoints
-    #         for keypoint in detection.keypoints:
-    #             keypoint_px = _normalized_to_pixel_coordinates(keypoint.x, keypoint.y,
-    #                                                            width, height)
-    #             color, thickness, radius = (0, 255, 0), 2, 2
-    #             cv2.circle(annotated_image, keypoint_px, thickness, color, radius)
-    #
-    #         # Draw label and score
-    #         category = detection.categories[0]
-    #         category_name = category.category_name
-    #         category_name = '' if category_name is None else category_name
-    #         probability = round(category.score, 2)
-    #         result_text = category_name + ' (' + str(probability) + ')'
-    #         text_location = (MARGIN + bbox.origin_x,
-    #                          MARGIN + ROW_SIZE + bbox.origin_y)
-    #         cv2.putText(annotated_image, result_text, text_location, cv2.FONT_HERSHEY_PLAIN,
-    #                     FONT_SIZE, TEXT_COLOR, FONT_THICKNESS)
-    #
-    #     return annotated_image
-
 
     def __del__(self):
         self.face_detector_model.close()
+
+
+class KorniaFaceDetector(_BaseFaceDetector):
+
+    FaceKeypoint = kc.FaceKeypoint
+
+    def __init__(self, confidence_threshold = 0.5, nms_threshold=0.3, device = 'cpu'):
+        if device == 'cuda':
+            if torch.cuda.is_available():
+                self.device = torch.device('cuda:0')
+            else:
+                print("CUDA in not available, run on CPU")
+                self.device = torch.device('cpu')
+        else:
+            self.device = torch.device('cpu')
+
+        self.face_detection_model = kc.FaceDetector(confidence_threshold=confidence_threshold,
+                                                    nms_threshold=nms_threshold).to(self.device)
+
+    def detect(self, images: List[np.ndarray], batch_size = 1) -> List[List[kc.FaceDetectorResult]]:
+        img_shapes = np.array([im.shape for im in images]).T
+        if len(np.unique(img_shapes[0])) > 1 or len(np.unique(img_shapes[1])) > 1 or len(np.unique(img_shapes[2])) > 1:
+            raise ValueError('All images shapes must be the same.')
+        images = np.array(images)
+        tensor_images = torch.FloatTensor(images).permute(0,3,1,2)
+        with torch.no_grad():
+            images_detections_list = []
+            for i in range(0, len(images), batch_size):
+                batch = tensor_images[i : i + batch_size].to(self.device)
+                detections_list = self.face_detection_model(batch)
+                for detections in detections_list:
+                    images_detections_list.append([kc.FaceDetectorResult(detection).to(torch.device('cpu'))
+                                                 for detection in detections])
+            return images_detections_list
+
+
+
+    def get_bboxes(self, image, *args, **kwargs):
+        detections = self.detect([image])[0]
+        bboxes = []
+        for detection in detections:
+            x, y = detection.top_left.numpy().astype(int)
+            w, h = int(detection.width.item()), int(detection.height.item())
+            bboxes.append((x, y, w, h))
+        return bboxes
+
+
+    def get_keypoints(self, image, keypoints_types=None) -> dict:
+        if keypoints_types is None:
+            keypoints_types = [self.FaceKeypoint.NOSE,
+                               self.FaceKeypoint.EYE_LEFT,
+                               self.FaceKeypoint.EYE_RIGHT,
+                               self.FaceKeypoint.NOSE,
+                               self.FaceKeypoint.MOUTH_LEFT,
+                               self.FaceKeypoint.MOUTH_RIGHT]
+
+        detections = self.detect([image])[0]
+        keypoints_dict = defaultdict(list)
+        for detection in detections:
+            for key_point in keypoints_types:
+                keypoints_dict[key_point].append(detection.get_keypoint(key_point).cpu().numpy().astype(int))
+        return keypoints_dict
 
 
