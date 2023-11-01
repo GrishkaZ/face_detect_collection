@@ -1,10 +1,40 @@
 import numpy as np
 import mediapipe as mp
 import cv2
+import os
 
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_face_mesh = mp.solutions.face_mesh
+
+root_dir = os.path.join(os.path.dirname(__file__), 'models/')
+
+#todo features by triangulation
+
+class MediapipeFaceAligner():
+
+    def __init__(self):
+        BaseOptions = mp.tasks.BaseOptions
+        FaceAligner = mp.tasks.vision.FaceAligner
+        FaceAlignerOptions = mp.tasks.vision.FaceAlignerOptions
+
+        options = FaceAlignerOptions(
+            base_options=BaseOptions(model_asset_path=os.path.join(root_dir, 'face_landmarker.task')),
+        )
+
+        self.face_aligner_model = FaceAligner.create_from_options(options)
+
+
+    def align(self, image):
+        mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=image)
+        image = self.face_aligner_model.align(mp_image)
+        return image.numpy_view()
+
+    def __del__(self):
+        self.face_aligner_model.close()
+
+
+
 
 class MediapipeLandmarksDrawer:
 
@@ -52,6 +82,7 @@ class MediapipeLandmarksDrawer:
 
 #todo return modes: images, landmarks, show image/video
 class MediapipeFaceMeshDetector:
+
     """
         drawer: draw landmarks if not None
     """
