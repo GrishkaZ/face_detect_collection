@@ -2,7 +2,5 @@ opencv-contrib-python>=4.6
 numpy
 onnx
 onnxruntime
-# face_recognition https://github.com/ageitgey/face_recognition # dlib
-# https://pyimagesearch.com/2018/06/18/face-recognition-with-opencv-python-and-deep-learning/
-mediapipe #https://developers.google.com/mediapipe
-kornia # https://kornia.readthedocs.io/en/latest/contrib.html
+mediapipe
+kornia

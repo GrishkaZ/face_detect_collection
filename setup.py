@@ -16,7 +16,7 @@ setup(
     install_requires=requirements,
     package_data={
         "face_detect_collection": [
-            'models/*',
+            'models/face_landmarker.task',
             'models/face_detection_models/*',
             'models/face_detection_models/face_detector_caffe/*',
             ],
