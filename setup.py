@@ -4,6 +4,7 @@ from face_detect_collection import __version__
 
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
+    print(requirements)
 
 setup(
     name='face_detect_collection',
@@ -16,7 +17,7 @@ setup(
     install_requires=requirements,
     package_data={
         "face_detect_collection": [
-            # 'models/face_landmarker.task',
+            'models/face_landmarker.task',
             'models/face_detection_models/*',
             'models/face_detection_models/face_detector_caffe/*',
             ],
